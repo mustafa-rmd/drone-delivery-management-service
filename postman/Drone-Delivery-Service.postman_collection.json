@@ -1,0 +1,756 @@
+{
+	"info": {
+		"_postman_id": "drone-delivery-api-v1",
+		"name": "Drone Delivery Service API",
+		"description": "Complete API collection for Acme Drone Delivery Service with authentication, order management, and drone operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "drone-delivery-v1"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8088",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "drone_name",
+			"value": "Drone-Alpha-1",
+			"type": "string"
+		},
+		{
+			"key": "enduser_name",
+			"value": "john_doe",
+			"type": "string"
+		},
+		{
+			"key": "admin_name",
+			"value": "admin",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"admin_name\", jsonData.name);",
+									"    console.log(\"Admin JWT Token saved:\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{admin_name}}\",\n  \"type\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate as admin user and receive JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Drone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"drone_name\", jsonData.name);",
+									"    console.log(\"Drone JWT Token saved:\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{drone_name}}\",\n  \"type\": \"drone\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate as drone and receive JWT token. Creates drone if not exists."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as End User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"enduser_name\", jsonData.name);",
+									"    console.log(\"End User JWT Token saved:\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{enduser_name}}\",\n  \"type\": \"enduser\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate as end user and receive JWT token"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for different user types (ADMIN, DRONE, ENDUSER)"
+		},
+		{
+			"name": "Order Management",
+			"item": [
+				{
+					"name": "Create Order (End User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"order_id\", jsonData.id);",
+									"    console.log(\"Order ID saved:\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"originLatitude\": 40.7128,\n  \"originLongitude\": -74.0060,\n  \"destinationLatitude\": 40.7589,\n  \"destinationLongitude\": -73.9851\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Create a new delivery order (requires ENDUSER role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Orders (End User)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/my-orders?page=0&size=20&sort=createdAt,desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"my-orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-indexed)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Number of items per page"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc",
+									"description": "Sort field and direction (e.g., createdAt,desc)"
+								}
+							]
+						},
+						"description": "Get paginated list of orders for the current end user"
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Order (End User)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{order_id}}",
+								"withdraw"
+							]
+						},
+						"description": "Withdraw a pending order (requires ENDUSER role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders?page=0&size=20&sort=createdAt,desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-indexed)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Number of items per page"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc",
+									"description": "Sort field and direction (e.g., createdAt,desc)"
+								}
+							]
+						},
+						"description": "Get paginated list of all orders in the system (requires ADMIN role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{order_id}}"
+							]
+						},
+						"description": "Get order details by ID (requires ADMIN or ENDUSER role)"
+					},
+					"response": []
+				}
+			],
+			"description": "Order management endpoints for creating and managing delivery orders"
+		},
+		{
+			"name": "Admin - Order Management",
+			"item": [
+				{
+					"name": "Update Order Origin (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 40.7200,\n  \"longitude\": -74.0100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/origin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{order_id}}",
+								"origin"
+							]
+						},
+						"description": "Admin updates order origin coordinates (only allowed for PENDING or RESERVED orders)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Destination (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 40.7600,\n  \"longitude\": -73.9900\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/destination",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{order_id}}",
+								"destination"
+							]
+						},
+						"description": "Admin updates order destination coordinates (not allowed for DELIVERED, FAILED, or WITHDRAWN orders)"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin endpoints for managing order locations"
+		},
+		{
+			"name": "Drone Operations",
+			"item": [
+				{
+					"name": "Get Available Jobs (Drone)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/jobs?page=0&size=20&sort=createdAt,asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-indexed)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Number of items per page"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,asc",
+									"description": "Sort field and direction (e.g., createdAt,asc for oldest first)"
+								}
+							]
+						},
+						"description": "Get paginated list of pending delivery orders available for pickup (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reserve Job (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/jobs/{{order_id}}/reserve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"jobs",
+								"{{order_id}}",
+								"reserve"
+							]
+						},
+						"description": "Reserve a delivery order for this drone (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Pickup Order (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/jobs/{{order_id}}/pickup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"jobs",
+								"{{order_id}}",
+								"pickup"
+							]
+						},
+						"description": "Mark order as picked up (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Deliver Order (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/jobs/{{order_id}}/deliver",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"jobs",
+								"{{order_id}}",
+								"deliver"
+							]
+						},
+						"description": "Mark order as delivered (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fail Order (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/jobs/{{order_id}}/fail",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"jobs",
+								"{{order_id}}",
+								"fail"
+							]
+						},
+						"description": "Mark order as failed (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Location (Drone)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 40.7589,\n  \"longitude\": -73.9851\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/drones/location",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"location"
+							]
+						},
+						"description": "Update drone's current location (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current Order (Drone)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/current-order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"current-order"
+							]
+						},
+						"description": "Get details of the order currently assigned to this drone (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Broken (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/broken",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"broken"
+							]
+						},
+						"description": "Mark this drone as broken (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Fixed (Drone)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/fixed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"fixed"
+							]
+						},
+						"description": "Mark this drone as fixed and available (requires DRONE role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Drones (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones?page=0&size=20&sort=name,asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-indexed)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Number of items per page"
+								},
+								{
+									"key": "sort",
+									"value": "name,asc",
+									"description": "Sort field and direction (e.g., name,asc)"
+								}
+							]
+						},
+						"description": "Get paginated list of all drones in the system (requires ADMIN role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Drone by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/{{drone_name}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"{{drone_name}}"
+							]
+						},
+						"description": "Get drone information by name (requires ADMIN or DRONE role)"
+					},
+					"response": []
+				}
+			],
+			"description": "Drone operations for managing deliveries and drone status"
+		},
+		{
+			"name": "Admin - Drone Management",
+			"item": [
+				{
+					"name": "Mark Drone as Broken (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/{{drone_name}}/broken",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"{{drone_name}}",
+								"broken"
+							]
+						},
+						"description": "Admin marks any drone as broken by name. This will trigger handoff of any assigned orders."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Drone as Fixed (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/drones/{{drone_name}}/fixed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"drones",
+								"{{drone_name}}",
+								"fixed"
+							]
+						},
+						"description": "Admin marks any drone as fixed and available by name"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin endpoints for managing drone status"
+		}
+	]
+}
