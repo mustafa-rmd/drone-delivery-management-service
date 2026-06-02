@@ -8,8 +8,8 @@ import com.acme.services.dronedelivery.service.DroneService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +30,8 @@ public class DroneController implements DroneControllerV1 {
   @Override
   @GetMapping("/jobs")
   @PreAuthorize("hasRole('DRONE')")
-  public ResponseEntity<Page<OrderDto>> getAvailableJobs(Pageable pageable) {
-    return ok(droneService.getAvailableJobs(pageable));
+  public ResponseEntity<PagedModel<OrderDto>> getAvailableJobs(Pageable pageable) {
+    return ok(new PagedModel<>(droneService.getAvailableJobs(pageable)));
   }
 
   @Override
@@ -94,8 +94,8 @@ public class DroneController implements DroneControllerV1 {
   @Override
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Page<DroneDto>> getAllDrones(Pageable pageable) {
-    return ok(droneService.getAllDrones(pageable));
+  public ResponseEntity<PagedModel<DroneDto>> getAllDrones(Pageable pageable) {
+    return ok(new PagedModel<>(droneService.getAllDrones(pageable)));
   }
 
   @Override

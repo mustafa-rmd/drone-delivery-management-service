@@ -52,8 +52,11 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
     ProblemDetail pd =
         ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
-    pd.setType(URI.create("about:blank"));
-    pd.setTitle("Bad Request");
+    pd.setType(URI.create(PROBLEM_BASE_URL + "/validation-error"));
+    pd.setTitle("Validation Failed");
+    if (request instanceof org.springframework.web.context.request.ServletWebRequest servletRequest) {
+      pd.setInstance(URI.create(servletRequest.getRequest().getRequestURI()));
+    }
     pd.setProperty("errors", errors);
 
     return ResponseEntity.badRequest().body(pd);
@@ -86,10 +89,9 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
       BusinessRuleViolationException ex, HttpServletRequest request) {
     log.warn("Business rule violation: {}", ex.getMessage());
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    pd.setType(URI.create("about:blank"));
-    pd.setTitle("Bad Request");
+    pd.setType(URI.create(PROBLEM_BASE_URL + "/business-rule-violation"));
+    pd.setTitle("Business Rule Violation");
     pd.setInstance(URI.create(request.getRequestURI()));
-    pd.setProperty("message", ex.getMessage());
     return pd;
   }
 

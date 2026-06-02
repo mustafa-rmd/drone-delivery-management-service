@@ -8,8 +8,8 @@ import com.acme.services.dronedelivery.service.OrderService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -40,8 +40,8 @@ public class OrderController implements OrderControllerV1 {
   @Override
   @GetMapping("/my-orders")
   @PreAuthorize("hasRole('ENDUSER')")
-  public ResponseEntity<Page<OrderDto>> getMyOrders(Principal principal, Pageable pageable) {
-    return ok(orderService.getMyOrders(getEnduserName(principal), pageable));
+  public ResponseEntity<PagedModel<OrderDto>> getMyOrders(Principal principal, Pageable pageable) {
+    return ok(new PagedModel<>(orderService.getMyOrders(getEnduserName(principal), pageable)));
   }
 
   @Override
@@ -54,8 +54,8 @@ public class OrderController implements OrderControllerV1 {
   @Override
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Page<OrderDto>> getAllOrders(Pageable pageable) {
-    return ok(orderService.getAllOrders(pageable));
+  public ResponseEntity<PagedModel<OrderDto>> getAllOrders(Pageable pageable) {
+    return ok(new PagedModel<>(orderService.getAllOrders(pageable)));
   }
 
   @Override

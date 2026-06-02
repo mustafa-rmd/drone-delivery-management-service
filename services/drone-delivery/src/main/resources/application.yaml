@@ -25,6 +25,12 @@ management:
 spring:
   application:
     name: drone-delivery
+  data:
+    web:
+      pageable:
+        # Bound client-controlled page sizes to protect the DB from oversized fetches.
+        max-page-size: 100
+        default-page-size: 20
   mvc:
     problemdetails:
       enabled: true
@@ -86,6 +92,9 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:drone-delivery-secret-key-change-in-production-minimum-256-bits-required-for-hs256-algorithm}
+  # No default on purpose: JWT_SECRET must be supplied via the environment so the app never
+  # boots with a publicly-known signing key. Startup fails fast if it is unset.
+  # Must be at least 256 bits (32+ characters) for the HS256 algorithm.
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
 

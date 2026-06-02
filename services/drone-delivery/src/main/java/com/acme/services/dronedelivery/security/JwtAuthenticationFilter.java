@@ -39,7 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         username = jwtUtil.extractUsername(jwt);
         userType = jwtUtil.extractUserType(jwt);
       } catch (Exception e) {
-        logger.error("Error extracting JWT claims", e);
+        // Expired/forged/malformed tokens are normal client behaviour, not a server error.
+        // The request continues unauthenticated and is rejected later with a 401 by the
+        // authentication entry point. Log quietly to avoid noise and log-flooding.
+        logger.debug("Ignoring invalid JWT: " + e.getMessage());
       }
     }
 

@@ -43,6 +43,24 @@ public class OrderDto {
   @Schema(description = "Assigned drone name", example = "Drone-Alpha-1")
   private String droneName;
 
+  @Schema(
+      description = "Current latitude of the assigned drone (null if unassigned)",
+      example = "40.7300")
+  private BigDecimal droneLatitude;
+
+  @Schema(
+      description = "Current longitude of the assigned drone (null if unassigned)",
+      example = "-73.9950")
+  private BigDecimal droneLongitude;
+
+  @Schema(
+      description =
+          "Estimated time to delivery in seconds, based on the assigned drone's current"
+              + " position and an assumed cruise speed. Null when the order is unassigned or in a"
+              + " terminal state.",
+      example = "420")
+  private Long etaSeconds;
+
   @Schema(description = "Creation timestamp")
   private LocalDateTime createdAt;
 

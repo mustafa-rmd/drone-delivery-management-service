@@ -67,10 +67,11 @@ public class OrderServiceImpl implements OrderService {
 
     Order order = findOrderByIdOrThrow(orderId);
     validateOrderOwnership(order, enduserName);
-    validateOrderStatusNot(
+    // An order may only be withdrawn before a drone has picked it up.
+    validateOrderStatus(
         order,
-        new OrderStatus[] {OrderStatus.DELIVERED, OrderStatus.WITHDRAWN},
-        "Order cannot be withdrawn in current status");
+        new OrderStatus[] {OrderStatus.PENDING, OrderStatus.RESERVED},
+        "Order cannot be withdrawn once it has been picked up or reached a terminal state");
 
     order.setStatus(OrderStatus.WITHDRAWN);
     orderRepository.save(order);

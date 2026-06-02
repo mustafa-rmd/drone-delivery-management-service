@@ -72,7 +72,7 @@ class OrderIntegrationTest extends BaseIntegrationTest {
             post("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -257,6 +257,54 @@ class OrderIntegrationTest extends BaseIntegrationTest {
                 .header(HttpHeaders.AUTHORIZATION, bearerToken(token)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("withdrawn"));
+  }
+
+  @Test
+  @DisplayName("Should not allow withdrawing an order that has already been picked up")
+  void shouldNotAllowWithdrawingPickedUpOrder() throws Exception {
+    // Given
+    String userToken = authenticateAsEndUser("pickup_withdraw_user");
+    String droneToken = authenticateAsDrone("Drone-Withdraw-1");
+
+    // Enduser creates an order
+    CreateOrderRequest createRequest =
+        CreateOrderRequest.builder()
+            .originLatitude(new BigDecimal("40.7128"))
+            .originLongitude(new BigDecimal("-74.0060"))
+            .destinationLatitude(new BigDecimal("40.7589"))
+            .destinationLongitude(new BigDecimal("-73.9851"))
+            .build();
+
+    MvcResult createResult =
+        mockMvc
+            .perform(
+                post("/api/orders")
+                    .header(HttpHeaders.AUTHORIZATION, bearerToken(userToken))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(createRequest)))
+            .andReturn();
+
+    OrderDto createdOrder =
+        objectMapper.readValue(createResult.getResponse().getContentAsString(), OrderDto.class);
+
+    // Drone reserves and picks up the order
+    mockMvc.perform(
+        post("/api/drones/jobs/" + createdOrder.getId() + "/reserve")
+            .header(HttpHeaders.AUTHORIZATION, bearerToken(droneToken)));
+    mockMvc.perform(
+        post("/api/drones/jobs/" + createdOrder.getId() + "/pickup")
+            .header(HttpHeaders.AUTHORIZATION, bearerToken(droneToken)));
+
+    // When & Then - Enduser can no longer withdraw it
+    mockMvc
+        .perform(
+            post("/api/orders/" + createdOrder.getId() + "/withdraw")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(userToken)))
+        .andExpect(status().isBadRequest())
+        .andExpect(
+            jsonPath("$.detail")
+                .value(
+                    "Order cannot be withdrawn once it has been picked up or reached a terminal state"));
   }
 
   @Test

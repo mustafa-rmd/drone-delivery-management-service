@@ -9,9 +9,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +23,7 @@ public interface DroneControllerV1 {
   @Operation(
       summary = "Get available jobs",
       description = "Get paginated list of pending delivery orders")
-  ResponseEntity<Page<OrderDto>> getAvailableJobs(
+  ResponseEntity<PagedModel<OrderDto>> getAvailableJobs(
       @Parameter(description = "Pagination parameters (page, size, sort)")
           @PageableDefault(size = 20, sort = "createdAt")
           Pageable pageable);
@@ -58,7 +58,7 @@ public interface DroneControllerV1 {
   @Operation(
       summary = "Get all drones",
       description = "Get paginated list of all drones (Admin only)")
-  ResponseEntity<Page<DroneDto>> getAllDrones(
+  ResponseEntity<PagedModel<DroneDto>> getAllDrones(
       @Parameter(description = "Pagination parameters (page, size, sort)")
           @PageableDefault(size = 20, sort = "name")
           Pageable pageable);

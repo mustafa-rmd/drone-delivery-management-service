@@ -163,10 +163,15 @@ The main application service providing:
 
 ### Prerequisites
 
-- **Java 21** or higher
+- **Java 21** — the build enforces this. `JAVA_HOME` must point at a JDK 21 installation; a
+  `maven-enforcer-plugin` rule (`requireJavaVersion [21,22)`) fails the build fast with a clear
+  message on any other version.
 - **Docker** and **Docker Compose**
 - **Maven 3.8+**
 - **PostgreSQL 16** (or use Docker Compose)
+- **`JWT_SECRET`** environment variable — required (no default). Must be at least 256 bits
+  (32+ characters) for HS256. Docker Compose sets one for you; for local runs, export it yourself
+  (see [Environment Variables](#environment-variables) below).
 
 ### Quick Start with Docker Compose
 
@@ -216,6 +221,8 @@ The main application service providing:
 3. **Run Drone Delivery Service**
    ```bash
    cd services/drone-delivery
+   # JWT_SECRET is required (no default) — must be at least 256 bits (32+ chars)
+   export JWT_SECRET=local-dev-secret-key-minimum-256-bits-for-hs256-algorithm
    mvn spring-boot:run
    ```
 
@@ -286,8 +293,11 @@ hikari:
 - Input validation with Bean Validation (JSR-380)
 - SQL injection prevention with JPA/Hibernate
 - CORS configuration for cross-origin requests
-- **TODO**: Move JWT secret to environment variable (currently in config)
-- **TODO**: Implement token refresh mechanism
+- JWT signing key supplied only via the `JWT_SECRET` environment variable — the app fails fast on
+  startup if it is unset, so it can never boot with a publicly-known default key
+- Unauthenticated requests receive an RFC 7807 `401 Unauthorized` (with `WWW-Authenticate: Bearer`);
+  authenticated-but-forbidden requests receive `403 Forbidden`
+- **TODO**: Implement token refresh mechanism (short-lived access tokens + refresh tokens)
 
 ---
 
@@ -326,17 +336,20 @@ Content-Type: application/json
 POST /api/orders
 Authorization: Bearer <token>
 
-# Get My Orders
-GET /api/orders/my?page=0&size=20
+# Get My Orders (includes assigned drone location and delivery ETA)
+GET /api/orders/my-orders?page=0&size=20
 
-# Withdraw Order
+# Get One Of My Orders
+GET /api/orders/{orderId}
+
+# Withdraw Order (only allowed before pickup)
 POST /api/orders/{orderId}/withdraw
 ```
 
 #### Drone Operations (DRONE)
 ```http
 # Get Available Jobs
-GET /api/drones/jobs/available?page=0&size=20
+GET /api/drones/jobs?page=0&size=20
 
 # Reserve Job
 POST /api/drones/jobs/{orderId}/reserve
@@ -347,23 +360,35 @@ POST /api/drones/jobs/{orderId}/pickup
 # Deliver Order
 POST /api/drones/jobs/{orderId}/deliver
 
+# Fail Order
+POST /api/drones/jobs/{orderId}/fail
+
 # Update Location
 PUT /api/drones/location
+
+# Get Currently Assigned Order
+GET /api/drones/current-order
+
+# Mark Self Broken / Fixed
+POST /api/drones/broken
+POST /api/drones/fixed
 ```
 
 #### Admin Operations (ADMIN)
 ```http
 # Get All Orders
-GET /api/admin/orders?page=0&size=20
+GET /api/orders?page=0&size=20
 
-# Update Order Origin
-PUT /api/admin/orders/{orderId}/origin
+# Update Order Origin / Destination
+PUT /api/orders/{orderId}/origin
+PUT /api/orders/{orderId}/destination
 
-# Mark Drone as Broken
-POST /api/admin/drones/{droneName}/broken
+# List Drones
+GET /api/drones?page=0&size=20
 
-# Mark Drone as Fixed
-POST /api/admin/drones/{droneName}/fixed
+# Mark Drone as Broken / Fixed (by name)
+POST /api/drones/{droneName}/broken
+POST /api/drones/{droneName}/fixed
 ```
 
 ### Response Format

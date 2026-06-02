@@ -259,7 +259,7 @@ class DroneIntegrationTest extends BaseIntegrationTest {
             post("/api/drones/jobs/" + order2.getId() + "/reserve")
                 .header(HttpHeaders.AUTHORIZATION, bearerToken(droneToken)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("Drone already has an active order"));
+        .andExpect(jsonPath("$.detail").value("Drone already has an active order"));
   }
 
   @Test
